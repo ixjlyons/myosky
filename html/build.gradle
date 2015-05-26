@@ -7,8 +7,8 @@ gwt {
     minHeapSize="1G"
 
     src = files(file("src/")) // Needs to be in front of "modules" below.
-    modules 'com.badlogicgames.plane.GdxDefinition'
-    devModules 'com.badlogicgames.plane.GdxDefinitionSuperdev'
+    modules 'ixjlyons.myosky.GdxDefinition'
+    devModules 'ixjlyons.myosky.GdxDefinitionSuperdev'
     project.webAppDirName = 'webapp'
 
     compiler {

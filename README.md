@@ -1,20 +1,19 @@
-The plane that couldn't fly good
-==========================
+# Myo Sky
 
-![plane](http://144.76.220.132/uploads/Screen%20Shot%202014-04-21%20at%2021.23.11-FYLrVshf9q.png)
+A fork of [theplanethatcouldntflygood][tptcfg], which is itself a simple
+Flappy Bird clone written with libgdx.
 
-"The plane that couldn't fly good" is a very simple Flappy Birds "clone" in 220 LOC. 
+It uses the microphone as an input to the plane, allowing for myoelectric
+control if an EMG sensor is plugged in to the microphone port (you could blow
+or hum into the microphone for control otherwise). The signal is recorded at
+8 kHz and windowed into 75 ms segments. For each segment, the RMS is calculated
+and put through a moving average filter to get the input value. This input
+value is used to control the vertical speed of the plane, working against
+gravity.
 
-### Try it here 
-  * [WebGL/Browser](http://libgdx.badlogicgames.com/demos/planegame)
-  * [Desktop](http://libgdx.badlogicgames.com/demos/planegame/planegame.jar)
-  * [Android](http://libgdx.badlogicgames.com/demos/planegame/planegame.apk)
+Because the AudioRecorder class is needed, this game doesn't have an `html`
+version (see [here][audiorecorder]).
 
-### Running
-* [Setup your development environment](https://github.com/libgdx/libgdx/wiki)
-* Clone the repository or download and extract the ZIP file
-* Import the project into your preferred development environment, run, debug and package it!
-  * [Eclipse](https://github.com/libgdx/libgdx/wiki/Gradle-and-Eclipse)
-  * [Intellij IDEA](https://github.com/libgdx/libgdx/wiki/Gradle-and-Intellij-IDEA)
-  * [NetBeans](https://github.com/libgdx/libgdx/wiki/Gradle-and-NetBeans)
-  * [Commandline|Gradle on the Commandline](https://github.com/libgdx/libgdx/wiki/Gradle-on-the-Commandline)
+
+[tptcfg]: https://github.com/badlogic/theplanethatcouldntflygood
+[audiorecorder]: https://github.com/libgdx/libgdx/wiki/Recording-pcm-audio
