@@ -5,10 +5,10 @@ import ixjlyons.myosky.Processor;
 import ixjlyons.myosky.RecordThread.OnReadListener;
 import ixjlyons.myosky.actors.Coin;
 import ixjlyons.myosky.actors.Plane;
-import ixjlyons.myosky.actors.Text;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Intersector;
@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -51,7 +52,7 @@ public class GameScreen implements Screen, OnReadListener {
     private Image ground2;
     private Image readyImage;
     private Image gameOverImage;
-    private Text scoreText;
+    private Label scoreText;
     private Array<Coin> coins = new Array<Coin>();
     
     private GameState gameState = GameState.Start;
@@ -110,11 +111,11 @@ public class GameScreen implements Screen, OnReadListener {
         stage.addActor(ground1);
         stage.addActor(ground2);
         stage.addActor(plane);
-        stage.addActor(prevButton);
         stage.addActor(readyImage);
         stage.addActor(gameOverImage);
         stage.addActor(scoreText);
-    
+        stage.addActor(prevButton);
+
         game.recordThread.setOnReadListener(this);
         processor = new Processor();
  
@@ -135,6 +136,11 @@ public class GameScreen implements Screen, OnReadListener {
         ground2.setPosition(ground1.getRight(), 0);
     }
     
+    private void initPlane() {
+        plane = new Plane();
+        plane.setPosition(PLANE_START_X, PLANE_START_Y);
+    }
+    
     private void initStatusImages() {
         readyImage = new Image(new Texture("ready.png"));
         readyImage.setPosition(
@@ -149,22 +155,18 @@ public class GameScreen implements Screen, OnReadListener {
     }
     
     private void initScoreText() {
-        scoreText = new Text(Gdx.files.internal("arial.fnt"));
-        scoreText.setColor(0.3f, 0.3f, 0.3f, 1);
+        scoreText = new Label("score: 0", skin, "large-font", new Color(0.3f, 0.3f, 0.3f, 1));
+        scoreText.setAlignment(Align.left);
         scoreText.setPosition(20, 20);
     }
     
     private void initButtons() {
-        float buttonWidth = 60f;
-        float buttonHeight = 50f;
-        float padding = 20f;
-        
         prevButton = new TextButton("<", skin, "default");
-        prevButton.setWidth(buttonWidth);
-        prevButton.setHeight(buttonHeight);
+        prevButton.setWidth(PlaneGame.NAV_BUTTON_WIDTH);
+        prevButton.setHeight(PlaneGame.NAV_BUTTON_HEIGHT);
         prevButton.setPosition(
-               stage.getWidth()-2*buttonWidth-2*padding,
-               padding);
+               stage.getWidth()-2*prevButton.getWidth()-2*PlaneGame.NAV_BUTTON_PADDING,
+               PlaneGame.NAV_BUTTON_PADDING);
         prevButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -173,11 +175,6 @@ public class GameScreen implements Screen, OnReadListener {
                 game.prevScreen();
             }
         });
-    }
-    
-    private void initPlane() {
-        plane = new Plane();
-        plane.setPosition(PLANE_START_X, PLANE_START_Y);
     }
     
     private void resetWorld() {
@@ -219,8 +216,7 @@ public class GameScreen implements Screen, OnReadListener {
         }
 
         input = 0;
-            
-        
+
         if(gameState != GameState.Start) {
             planeSpeed += GRAVITY;
         }
@@ -237,14 +233,6 @@ public class GameScreen implements Screen, OnReadListener {
         }
 
         for(Coin c: coins) {
-//            if(camera.position.x - r.position.x > 400 + r.image.getRegionWidth()) {
-//                boolean isDown = MathUtils.randomBoolean();
-//                r.position.x -= 5 * 200;
-//                r.position.y = isDown?480-rock.getRegionHeight(): 0;
-//                r.image = isDown? rockDown: rock;
-//                r.counted = false;
-//            }
-            
             if(Intersector.overlaps(c.getCircle(), plane.getRectangle()) && !c.getCounted()) {
                 score++;
                 c.setCounted(true);

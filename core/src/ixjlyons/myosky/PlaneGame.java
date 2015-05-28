@@ -16,6 +16,10 @@ public class PlaneGame extends Game {
     public static final int WIDTH = 1280;
     public static final int HEIGHT = 800;
     
+    public static final float NAV_BUTTON_PADDING = 30;
+    public static final float NAV_BUTTON_WIDTH = 80;
+    public static final float NAV_BUTTON_HEIGHT = 60;
+    
     private TitleScreen titleScreen;
     private SignalScreen signalScreen;
     private CalibrationScreen calibrationScreen;

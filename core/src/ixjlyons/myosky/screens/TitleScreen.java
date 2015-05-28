@@ -59,11 +59,11 @@ public class TitleScreen implements Screen {
     
     private void initButtons() {
         nextButton = new TextButton("Begin!", skin, "default");
-        nextButton.setWidth(100f);
-        nextButton.setHeight(60f);
+        nextButton.setWidth(150);
+        nextButton.setHeight(100);
         nextButton.setPosition(
                 stage.getWidth()/2-nextButton.getWidth()/2,
-                stage.getHeight()/4+nextButton.getHeight()/2);
+                stage.getHeight()/5+nextButton.getHeight()/2);
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

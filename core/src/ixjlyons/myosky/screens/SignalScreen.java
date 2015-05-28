@@ -6,17 +6,17 @@ import ixjlyons.myosky.actors.SignalViewer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -30,8 +30,6 @@ public class SignalScreen implements Screen, OnReadListener {
     final PlaneGame game;
     
     private Skin skin;
-    private BitmapFont font;
-    private GlyphLayout glyphLayout;
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
     
@@ -40,16 +38,12 @@ public class SignalScreen implements Screen, OnReadListener {
     private Image background;
     private Button nextButton;
     private Button prevButton;
+    private Label text;
     
     public SignalScreen(final PlaneGame game) {
         this.game = game;
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        
-        font = new BitmapFont(Gdx.files.internal("arial.fnt"));
-        font.setColor(0.3f, 0.3f, 0.3f, 1);
-        glyphLayout = new GlyphLayout();
-        glyphLayout.setText(font, TEXT);      
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, PlaneGame.WIDTH, PlaneGame.HEIGHT);
@@ -58,8 +52,10 @@ public class SignalScreen implements Screen, OnReadListener {
         
         stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
         initBackground();
+        initText();
         initButtons();
         stage.addActor(background);
+        stage.addActor(text);
         stage.addActor(nextButton);
         stage.addActor(prevButton);
         
@@ -73,16 +69,12 @@ public class SignalScreen implements Screen, OnReadListener {
     }
     
     private void initButtons() {
-        float buttonWidth = 60f;
-        float buttonHeight = 50f;
-        float padding = 20f;
-        
         prevButton = new TextButton("<", skin, "default");
-        prevButton.setWidth(buttonWidth);
-        prevButton.setHeight(buttonHeight);
+        prevButton.setWidth(PlaneGame.NAV_BUTTON_WIDTH);
+        prevButton.setHeight(PlaneGame.NAV_BUTTON_HEIGHT);
         prevButton.setPosition(
-               stage.getWidth()-2*buttonWidth-2*padding,
-               padding);
+               stage.getWidth()-2*prevButton.getWidth()-2*PlaneGame.NAV_BUTTON_PADDING,
+               PlaneGame.NAV_BUTTON_PADDING);
         prevButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -91,17 +83,25 @@ public class SignalScreen implements Screen, OnReadListener {
         });
         
         nextButton = new TextButton(">", skin, "default");
-        nextButton.setWidth(buttonWidth);
-        nextButton.setHeight(buttonHeight);
+        nextButton.setWidth(PlaneGame.NAV_BUTTON_WIDTH);
+        nextButton.setHeight(PlaneGame.NAV_BUTTON_HEIGHT);
         nextButton.setPosition(
-                stage.getWidth()-buttonWidth-padding,
-                padding);
+                stage.getWidth()-nextButton.getWidth()-PlaneGame.NAV_BUTTON_PADDING,
+                PlaneGame.NAV_BUTTON_PADDING);
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.nextScreen();
             }
         });
+    }
+    
+    private void initText() {
+        text = new Label(TEXT, skin, "large-font", new Color(0.3f, 0.3f, 0.3f, 1));
+        text.setAlignment(Align.center);
+        text.setPosition(
+                stage.getWidth()/2-text.getWidth()/2,
+                3*stage.getHeight()/4-text.getHeight()/2);
     }
     
     @Override
@@ -127,18 +127,6 @@ public class SignalScreen implements Screen, OnReadListener {
         stage.draw();
         
         camera.update();
-        
-        game.getSpriteBatch().setProjectionMatrix(camera.combined);
-        game.getSpriteBatch().begin();
-        font.draw(
-                game.getSpriteBatch(),
-                TEXT,
-                PlaneGame.WIDTH/2f - glyphLayout.width/2,
-                3*stage.getHeight()/4 + glyphLayout.height/2,
-                glyphLayout.width,
-                Align.center,
-                false);
-        game.getSpriteBatch().end();
         
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeType.Line);
@@ -166,7 +154,6 @@ public class SignalScreen implements Screen, OnReadListener {
 
     @Override
     public void dispose() {
-        font.dispose();
         shapeRenderer.dispose();
         stage.dispose();
     }
