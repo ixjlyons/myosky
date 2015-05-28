@@ -1,7 +1,11 @@
 # Myo Sky
 
-A fork of [theplanethatcouldntflygood][tptcfg], which is itself a simple
-Flappy Bird clone written with libgdx.
+This is a game for demonstrating computer interface control through surface
+electromyography at the [World Science Festival][wsf].
+
+It is a fork of [theplanethatcouldntflygood][tptcfg], which is itself a simple
+Flappy Bird clone written with libgdx (which is itself a ripoff of that
+helicopter Flash game).
 
 It uses the microphone as an input to the plane, allowing for myoelectric
 control if an EMG sensor is plugged in to the microphone port (you could blow
@@ -15,5 +19,6 @@ Because the AudioRecorder class is needed, this game doesn't have an `html`
 version (see [here][audiorecorder]).
 
 
+[wsf]: http://www.worldsciencefestival.com/
 [tptcfg]: https://github.com/badlogic/theplanethatcouldntflygood
 [audiorecorder]: https://github.com/libgdx/libgdx/wiki/Recording-pcm-audio

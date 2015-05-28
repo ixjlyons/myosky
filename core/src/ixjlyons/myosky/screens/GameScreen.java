@@ -6,7 +6,6 @@ import ixjlyons.myosky.RecordThread.OnReadListener;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -19,7 +18,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class GameScreen implements Screen, OnReadListener {
 
@@ -30,6 +36,10 @@ public class GameScreen implements Screen, OnReadListener {
     private static final float SENSITIVITY = 75;
     
     final PlaneGame game;
+    
+    private Stage stage;
+    private Skin skin;
+    private Button prevButton;
 
     private SpriteBatch batch;
     private OrthographicCamera camera;
@@ -37,7 +47,6 @@ public class GameScreen implements Screen, OnReadListener {
     private Texture background;
     private TextureRegion ground;
     private float groundOffsetX = 0;
-    private TextureRegion ceiling;
     private TextureRegion rock;
     private TextureRegion rockDown;
     private Animation plane;
@@ -55,8 +64,6 @@ public class GameScreen implements Screen, OnReadListener {
     private int score = 0;
     private Rectangle rect1 = new Rectangle();
     private Rectangle rect2 = new Rectangle();
-    
-    private Sound explode;
     
     private Processor processor;
     
@@ -77,10 +84,8 @@ public class GameScreen implements Screen, OnReadListener {
         
         background = new Texture("background.png"); 
         ground = new TextureRegion(new Texture("ground.png"));
-        ceiling = new TextureRegion(ground);
-        ceiling.flip(true, true);
         
-        rock = new TextureRegion(new Texture("rock.png"));
+        rock = new TextureRegion(new Texture("coin.png"));
         rockDown = new TextureRegion(rock);
         rockDown.flip(false, true);
         
@@ -99,13 +104,37 @@ public class GameScreen implements Screen, OnReadListener {
                 new TextureRegion(frame3),
                 new TextureRegion(frame2));
         plane.setPlayMode(PlayMode.LOOP);
-
-        explode = Gdx.audio.newSound(Gdx.files.internal("explode.wav"));
+        
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
+        initButtons();
+        stage.addActor(prevButton);
     
         game.recordThread.setOnReadListener(this);
         processor = new Processor();
         
         resetWorld();
+    }
+    
+    private void initButtons() {
+        float buttonWidth = 60f;
+        float buttonHeight = 50f;
+        float padding = 20f;
+        
+        prevButton = new TextButton("<", skin, "default");
+        prevButton.setWidth(buttonWidth);
+        prevButton.setHeight(buttonHeight);
+        prevButton.setPosition(
+               stage.getWidth()-2*buttonWidth-2*padding,
+               padding);
+        prevButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                gameState = GameState.Start;
+                resetWorld();
+                game.prevScreen();
+            }
+        });
     }
     
     private void resetWorld() {
@@ -175,7 +204,6 @@ public class GameScreen implements Screen, OnReadListener {
                     20,
                     r.image.getRegionHeight() - 10);
             if(rect1.overlaps(rect2)) {
-                if(gameState != GameState.GameOver) explode.play();
                 gameState = GameState.GameOver;
                 planeVelocity.x = 0;                
             }
@@ -185,14 +213,15 @@ public class GameScreen implements Screen, OnReadListener {
             }
         }
         
-        if(planePosition.y < ground.getRegionHeight() - 20 || 
-            planePosition.y + plane.getKeyFrames()[0].getRegionHeight() > 
-                480 - ground.getRegionHeight() + 20) {
-            if(gameState != GameState.GameOver) explode.play();
-            //planeVelocity.y = 0;
-            gameState = GameState.GameOver;
-            planeVelocity.x = 0;
-        }       
+        if(planePosition.y < ground.getRegionHeight() - 20) {
+            planeVelocity.y = 0;
+            planePosition.y = ground.getRegionHeight() - 20;
+        }
+        
+        if (planePosition.y > camera.viewportHeight - plane.getKeyFrame(0).getRegionHeight()) {
+            planeVelocity.y = 0;
+            planePosition.y = camera.viewportHeight - plane.getKeyFrame(0).getRegionHeight();
+        }
     }
     
     private void drawWorld() {
@@ -205,10 +234,6 @@ public class GameScreen implements Screen, OnReadListener {
         }
         batch.draw(ground, groundOffsetX, 0);
         batch.draw(ground, groundOffsetX + ground.getRegionWidth(), 0);
-        batch.draw(ceiling, groundOffsetX, 480 - ceiling.getRegionHeight());
-        batch.draw(ceiling,
-                groundOffsetX + ceiling.getRegionWidth(),
-                480 - ceiling.getRegionHeight());
         batch.draw(plane.getKeyFrame(planeStateTime), planePosition.x, planePosition.y);
         batch.end();
         
@@ -240,8 +265,10 @@ public class GameScreen implements Screen, OnReadListener {
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
+        stage.act(delta);
         updateWorld();
         drawWorld();
+        stage.draw();
     }
     
     @Override
@@ -281,6 +308,7 @@ public class GameScreen implements Screen, OnReadListener {
     @Override
     public void show() {
         game.recordThread.setOnReadListener(this);
+        Gdx.input.setInputProcessor(stage);
     }
 
     @Override

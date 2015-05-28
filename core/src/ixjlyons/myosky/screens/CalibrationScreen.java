@@ -111,7 +111,9 @@ public class CalibrationScreen implements Screen, OnReadListener {
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.nextScreen();
+                if (thresh != -1) {
+                    game.nextScreen();
+                }
             }
         });
     }
@@ -175,7 +177,7 @@ public class CalibrationScreen implements Screen, OnReadListener {
     }
     
     public float getThreshold() {
-        return (thresh - stage.getHeight()/2) / stage.getHeight();
+        return thresh;
     }
 
     @Override
