@@ -12,7 +12,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -31,7 +31,6 @@ public class TitleScreen implements Screen {
     private Stage stage;
     private Plane plane;
     private Skin skin;
-    private SpriteBatch batch;
     private Image background;
     private Button nextButton;
     private Image title;
@@ -39,10 +38,9 @@ public class TitleScreen implements Screen {
     public TitleScreen(final PlaneGame game) {
         this.game = game;
         
-        batch = new SpriteBatch();
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         
-        stage = new Stage(new ExtendViewport(1280, 800));
+        stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
         initBackground();
         initButtons();
         initPlane();
@@ -94,7 +92,9 @@ public class TitleScreen implements Screen {
     }
     
     private void initTitle() {
-        title = new Image(new Texture("title.png"));
+        Texture t = new Texture("title.png");
+        t.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+        title = new Image(t);
         title.setPosition(
                 stage.getWidth()/2-title.getWidth()/2,
                 3*stage.getHeight()/4f-title.getHeight()/2);
@@ -105,9 +105,9 @@ public class TitleScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         stage.act(Gdx.graphics.getDeltaTime());
-        batch.begin();
+        game.getSpriteBatch().begin();
         stage.draw();
-        batch.end();
+        game.getSpriteBatch().end();
     }
 
     @Override

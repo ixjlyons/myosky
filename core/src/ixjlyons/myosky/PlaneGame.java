@@ -9,20 +9,27 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class PlaneGame extends Game {
-
+    
+    public static final int WIDTH = 1280;
+    public static final int HEIGHT = 800;
+    
     private TitleScreen titleScreen;
     private SignalScreen signalScreen;
     private CalibrationScreen calibrationScreen;
     private GameScreen gameScreen;
     private Screen currentScreen;
     
+    private SpriteBatch spriteBatch;
     private Music music;
     public RecordThread recordThread;
     
     @Override
     public void create() {
+        spriteBatch = new SpriteBatch();
+        
         recordThread = new RecordThread(8000, 600);
         recordThread.start();
         
@@ -52,6 +59,24 @@ public class PlaneGame extends Game {
         }
         
         setScreen(currentScreen);
+    }
+    
+    public void prevScreen() {
+        if (currentScreen == signalScreen) {
+            currentScreen = titleScreen;
+        }
+        else if (currentScreen == calibrationScreen) {
+            currentScreen = signalScreen;
+        }
+        else if (currentScreen == gameScreen) {
+            currentScreen = calibrationScreen;
+        }
+        
+        setScreen(currentScreen);
+    }
+    
+    public SpriteBatch getSpriteBatch() {
+        return spriteBatch;
     }
     
     @Override

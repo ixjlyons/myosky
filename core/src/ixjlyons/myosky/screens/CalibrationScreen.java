@@ -3,6 +3,7 @@ package ixjlyons.myosky.screens;
 import ixjlyons.myosky.PlaneGame;
 import ixjlyons.myosky.Processor;
 import ixjlyons.myosky.RecordThread.OnReadListener;
+import ixjlyons.myosky.actors.SignalViewer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -10,7 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
@@ -21,52 +22,60 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class CalibrationScreen implements Screen, OnReadListener {
     
-    private static final float[] LINE_COLOR = {
-        0x50 / 256f,
-        0xce / 256f,
-        0xa2 / 256f,
-        1f
-    };
-    
+    public static final String TEXT = 
+            "This is the smoothed, root mean square (RMS) signal." +
+            "\n" +
+            "Touch the screen to set the calibration level.";
     final PlaneGame game;
-    
-    private SpriteBatch batch;
+
     private Skin skin;
     private BitmapFont font;
+    private GlyphLayout glyphLayout;
     private OrthographicCamera camera;
     private ShapeRenderer shapeRenderer;
     
     private float[] inputData = new float[100];
     private Processor processor;
-    private int thresh = -1;
+    private float thresh = -1;
     
     private Stage stage;
     private Image background;
     private Button nextButton;
+    private Button prevButton;
+    private SignalViewer signalViewer;
+    private Vector3 touchPoint;
     
     public CalibrationScreen(final PlaneGame game) {
         this.game = game;
-        
-        batch = new SpriteBatch();
-        font = new BitmapFont();
+
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         
+        font = new BitmapFont(Gdx.files.internal("arial.fnt"));
+        font.setColor(0.3f, 0.3f, 0.3f, 1);
+        glyphLayout = new GlyphLayout();
+        glyphLayout.setText(font, TEXT);
+        
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
+        camera.setToOrtho(false, PlaneGame.WIDTH, PlaneGame.HEIGHT);
         
         shapeRenderer = new ShapeRenderer();
         
-        stage = new Stage(new ExtendViewport(800, 480));
+        stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
         initBackground();
         initButtons();
         stage.addActor(background);
         stage.addActor(nextButton);
+        stage.addActor(prevButton);
+        
+        signalViewer = new SignalViewer(0, stage.getHeight(), stage.getWidth(), 0);
         
         processor = new Processor();
+        touchPoint = new Vector3();
     }
     
     private void initBackground() {
@@ -76,12 +85,29 @@ public class CalibrationScreen implements Screen, OnReadListener {
     }
     
     private void initButtons() {
-        nextButton = new TextButton("Next", skin, "default");
-        nextButton.setWidth(100f);
-        nextButton.setHeight(60f);
+        float buttonWidth = 60f;
+        float buttonHeight = 50f;
+        float padding = 20f;
+        
+        prevButton = new TextButton("<", skin, "default");
+        prevButton.setWidth(buttonWidth);
+        prevButton.setHeight(buttonHeight);
+        prevButton.setPosition(
+               stage.getWidth()-2*buttonWidth-2*padding,
+               padding);
+        prevButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.prevScreen();
+            }
+        });
+        
+        nextButton = new TextButton(">", skin, "default");
+        nextButton.setWidth(buttonWidth);
+        nextButton.setHeight(buttonHeight);
         nextButton.setPosition(
-                stage.getWidth()/2-nextButton.getWidth()/2,
-                stage.getHeight()/4+nextButton.getHeight()/2);
+                stage.getWidth()-buttonWidth-padding,
+                padding);
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -101,34 +127,41 @@ public class CalibrationScreen implements Screen, OnReadListener {
         });
     }
     
-    /**
-     * Shifts input data back one sample and adds a new data point to the end.
-     * @param input : new data point to add
-     */
     private void updateDataBuffer(float input) {
         for (int i = 0; i < inputData.length-1; i++) {
             inputData[i] = inputData[i+1];
         }
         inputData[inputData.length-1] = input;
+        
+        signalViewer.setData(inputData);
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         Gdx.gl.glLineWidth(3);
+
+        if (Gdx.input.isTouched()) {
+            touchPoint.set(0, Gdx.input.getY(), 0);
+            thresh = signalViewer.setThresh(camera.unproject(touchPoint).y);
+        }
         
         stage.act();
         stage.draw();
         
         camera.update();
-        batch.setProjectionMatrix(camera.combined);
-
-        batch.begin();
-        font.draw(batch, "Welcome!", 100, 150);
-        font.draw(batch, "Tap anywhere to begin!", 100, 100);
-        font.draw(batch, "" + (thresh-240)/240f, 100, 50);
-        batch.end();
+        
+        game.getSpriteBatch().setProjectionMatrix(camera.combined);
+        game.getSpriteBatch().begin();
+        font.draw(
+                game.getSpriteBatch(),
+                TEXT,
+                PlaneGame.WIDTH/2f - glyphLayout.width/2,
+                3*stage.getHeight()/4 + glyphLayout.height/2,
+                glyphLayout.width,
+                Align.center,
+                false);
+        game.getSpriteBatch().end();
         
         if (inputData == null) {
             return;
@@ -136,42 +169,13 @@ public class CalibrationScreen implements Screen, OnReadListener {
         
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeType.Line);
-        
-        float xscale = 400/(float)inputData.length;
-        float xoffset = 0;
-        float yscale = 240;
-        float yoffset = 240;
-        
-        shapeRenderer.setColor(0, 0, 0, 1);
-        shapeRenderer.line(0, 240, 400, 240);
-        
-        shapeRenderer.setColor(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3]);
-        for (int i = 0; i < inputData.length-1; i++) {
-            shapeRenderer.line(
-                    i*xscale + xoffset,
-                    yscale*inputData[i] + yoffset,
-                    (i+1)*xscale + xoffset,
-                    yscale*inputData[i+1] + yoffset);
-        }
-        
-        if (thresh != -1) {
-            shapeRenderer.setColor(1, 0, 0, 1);
-            shapeRenderer.line(0, thresh, 400, thresh);
-        }
-        
+        signalViewer.draw(shapeRenderer);
+
         shapeRenderer.end();
-        
-        if (Gdx.input.isTouched()) {
-            Vector3 v = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            v = camera.unproject(v);
-            if (v.y > stage.getHeight()/2) {
-                thresh = (int)v.y;
-            }
-        }
     }
     
     public float getThreshold() {
-        return (thresh - 240) / 240f;
+        return (thresh - stage.getHeight()/2) / stage.getHeight();
     }
 
     @Override
@@ -194,7 +198,6 @@ public class CalibrationScreen implements Screen, OnReadListener {
 
     @Override
     public void dispose() {
-        batch.dispose();
         font.dispose();
         shapeRenderer.dispose();
         stage.dispose();
