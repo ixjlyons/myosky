@@ -49,8 +49,7 @@ public class SignalScreen implements Screen, OnReadListener {
         font = new BitmapFont(Gdx.files.internal("arial.fnt"));
         font.setColor(0.3f, 0.3f, 0.3f, 1);
         glyphLayout = new GlyphLayout();
-        glyphLayout.setText(font, TEXT);
-        
+        glyphLayout.setText(font, TEXT);      
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, PlaneGame.WIDTH, PlaneGame.HEIGHT);

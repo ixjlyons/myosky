@@ -7,12 +7,14 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public class Plane extends Actor {
 
     private Animation animation;
     private float stateTime;
+    private Rectangle rectangle = new Rectangle();
     
     public Plane() {
         Texture frame1 = new Texture("plane1.png");
@@ -29,6 +31,10 @@ public class Plane extends Actor {
         animation.setPlayMode(PlayMode.LOOP);
         
         setBounds(getX(), getY(), frame1.getWidth(), frame1.getHeight());
+    }
+    
+    public Rectangle getRectangle() {
+        return rectangle.set(getX(), getY(), getWidth(), getHeight());
     }
     
     @Override

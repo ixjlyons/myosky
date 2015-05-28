@@ -3,117 +3,155 @@ package ixjlyons.myosky.screens;
 import ixjlyons.myosky.PlaneGame;
 import ixjlyons.myosky.Processor;
 import ixjlyons.myosky.RecordThread.OnReadListener;
+import ixjlyons.myosky.actors.Coin;
+import ixjlyons.myosky.actors.Plane;
+import ixjlyons.myosky.actors.Text;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
+import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class GameScreen implements Screen, OnReadListener {
 
     private static final float GRAVITY = -10;
-    private static final float PLANE_VELOCITY_X = 200;
     private static final float PLANE_START_Y = 100;
     private static final float PLANE_START_X = 50;
+    private static final float SCROLL_SPEED = 200;
     private static final float SENSITIVITY = 75;
+    
+    static enum GameState {
+        Start,
+        Running,
+        GameOver
+    }
     
     final PlaneGame game;
     
     private Stage stage;
     private Skin skin;
     private Button prevButton;
-
-    private SpriteBatch batch;
-    private OrthographicCamera camera;
-    private OrthographicCamera uiCamera;
-    private Texture background;
-    private TextureRegion ground;
-    private float groundOffsetX = 0;
-    private TextureRegion rock;
-    private TextureRegion rockDown;
-    private Animation plane;
-    private TextureRegion ready;
-    private TextureRegion gameOver;
-    private BitmapFont font;
-    
-    private Vector2 planePosition = new Vector2();
-    private Vector2 planeVelocity = new Vector2();
-    private float planeStateTime = 0;
-    private Vector2 gravity = new Vector2();
-    private Array<Rock> rocks = new Array<Rock>();
+    private Plane plane;
+    private Image background;
+    private Image ground1;
+    private Image ground2;
+    private Image readyImage;
+    private Image gameOverImage;
+    private Text scoreText;
+    private Array<Coin> coins = new Array<Coin>();
     
     private GameState gameState = GameState.Start;
     private int score = 0;
-    private Rectangle rect1 = new Rectangle();
-    private Rectangle rect2 = new Rectangle();
     
     private Processor processor;
+    private float scrollSpeed;
+    private float planeSpeed;
     
     private float input = 0.0f;
     private float thresh;
     
+    private Task spawnTask = new Task() {
+        @Override
+        public void run() {
+            Coin c = new Coin();
+            
+            // spawn a coin according to one of two triangular distributions
+            // one centered about the lower half of the stage
+            // one centered about the upper half of the stage
+            boolean low = MathUtils.randomBoolean();
+            float y;
+            if (low) {
+                y = MathUtils.randomTriangular(
+                        ground1.getHeight(),
+                        stage.getHeight()/2);
+            }
+            else {
+                y = MathUtils.randomTriangular(
+                        stage.getHeight()/2,
+                        stage.getHeight()-c.getHeight());
+            }
+            
+            c.setPosition(stage.getWidth(), y);
+            stage.addActor(c);
+            coins.add(c);
+            
+            if (gameState == GameState.Running) { 
+                Timer.schedule(spawnTask, MathUtils.random(2f, 5f));
+            }
+        }
+    };
+    
     public GameScreen(final PlaneGame game) {
         this.game = game;
-
-        batch = new SpriteBatch();
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
-        uiCamera = new OrthographicCamera();
-        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        uiCamera.update();
-        
-        font = new BitmapFont(Gdx.files.internal("arial.fnt"));
-        
-        background = new Texture("background.png"); 
-        ground = new TextureRegion(new Texture("ground.png"));
-        
-        rock = new TextureRegion(new Texture("coin.png"));
-        rockDown = new TextureRegion(rock);
-        rockDown.flip(false, true);
-        
-        Texture frame1 = new Texture("plane1.png");
-        frame1.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        Texture frame2 = new Texture("plane2.png");
-        Texture frame3 = new Texture("plane3.png");
-        
-        ready = new TextureRegion(new Texture("ready.png"));
-        gameOver = new TextureRegion(new Texture("gameover.png"));
-        
-        plane = new Animation(
-                0.05f,
-                new TextureRegion(frame1),
-                new TextureRegion(frame2),
-                new TextureRegion(frame3),
-                new TextureRegion(frame2));
-        plane.setPlayMode(PlayMode.LOOP);
         
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
+        initBackground();
+        initGround();
         initButtons();
+        initPlane();
+        initStatusImages();
+        initScoreText();
+        stage.addActor(background);
+        stage.addActor(ground1);
+        stage.addActor(ground2);
+        stage.addActor(plane);
         stage.addActor(prevButton);
+        stage.addActor(readyImage);
+        stage.addActor(gameOverImage);
+        stage.addActor(scoreText);
     
         game.recordThread.setOnReadListener(this);
         processor = new Processor();
-        
+ 
         resetWorld();
+    }
+    
+    private void initBackground() {
+        background = new Image(new Texture("background.png"));
+        background.setPosition(0, 0);
+        background.setSize(stage.getWidth(), stage.getHeight());
+    }
+    
+    private void initGround() {
+        Texture t = new Texture("sand.png");
+        ground1 = new Image(t);
+        ground2 = new Image(t);
+        ground1.setPosition(0, 0);
+        ground2.setPosition(ground1.getRight(), 0);
+    }
+    
+    private void initStatusImages() {
+        readyImage = new Image(new Texture("ready.png"));
+        readyImage.setPosition(
+                (stage.getWidth()-readyImage.getWidth()) / 2,
+                (stage.getHeight()-readyImage.getHeight()) / 2);
+        readyImage.setVisible(false);
+        
+        gameOverImage = new Image(new Texture("gameover.png"));
+        gameOverImage.setAlign(Align.center);
+        gameOverImage.setPosition(stage.getWidth()/2, stage.getHeight()/2);
+        gameOverImage.setVisible(false);
+    }
+    
+    private void initScoreText() {
+        scoreText = new Text(Gdx.files.internal("arial.fnt"));
+        scoreText.setColor(0.3f, 0.3f, 0.3f, 1);
+        scoreText.setPosition(20, 20);
     }
     
     private void initButtons() {
@@ -137,35 +175,41 @@ public class GameScreen implements Screen, OnReadListener {
         });
     }
     
-    private void resetWorld() {
-        score = 0;
-        groundOffsetX = 0;
-        planePosition.set(PLANE_START_X, PLANE_START_Y);
-        planeVelocity.set(0, 0);
-        gravity.set(0, GRAVITY);
-        camera.position.x = 400;
-        
-        rocks.clear();
-        for(int i = 0; i < 5; i++) {
-            boolean isDown = MathUtils.randomBoolean();
-            rocks.add(new Rock(
-                    700 + i * 200,
-                    isDown ? 480-rock.getRegionHeight(): 0, (isDown ? rockDown: rock)));
-        }
+    private void initPlane() {
+        plane = new Plane();
+        plane.setPosition(PLANE_START_X, PLANE_START_Y);
     }
     
-    private void updateWorld() {
-        float deltaTime = Gdx.graphics.getDeltaTime();
-        planeStateTime += deltaTime;
+    private void resetWorld() {
+        spawnTask.cancel();
+        score = 0;
+        scrollSpeed = 0;
+        ground1.setX(0);
+        ground2.setX(ground1.getRight());
+        plane.setPosition(PLANE_START_X, PLANE_START_Y);
+        planeSpeed = 0;
+        readyImage.setVisible(true);
+        gameOverImage.setVisible(false);
         
+        for (Coin c: coins) {
+            c.remove();
+        }
+        coins.clear();
+    }
+    
+    private void updateWorld(float delta) {
+
         if(gameState == GameState.Running) {
-            planeVelocity.add(0, (input/thresh)*SENSITIVITY);
+            planeSpeed += (input/thresh)*SENSITIVITY;
         }
         
         if(Gdx.input.justTouched() || input > thresh) {
             if(gameState == GameState.Start) {
                 gameState = GameState.Running;
-                planeVelocity.set(PLANE_VELOCITY_X, 0);
+                scrollSpeed = SCROLL_SPEED;
+                planeSpeed = 0;
+                readyImage.setVisible(false);
+                Timer.schedule(spawnTask, 5);
             }
             
             if(gameState == GameState.GameOver) {
@@ -176,99 +220,77 @@ public class GameScreen implements Screen, OnReadListener {
 
         input = 0;
             
-        if(gameState != GameState.Start) planeVelocity.add(gravity);
         
-        planePosition.mulAdd(planeVelocity, deltaTime);
-        
-        camera.position.x = planePosition.x + 350;      
-        if(camera.position.x - groundOffsetX > ground.getRegionWidth() + 400) {
-            groundOffsetX += ground.getRegionWidth();
+        if(gameState != GameState.Start) {
+            planeSpeed += GRAVITY;
         }
-                
-        rect1.set(
-                planePosition.x + 20,
-                planePosition.y,
-                plane.getKeyFrames()[0].getRegionWidth() - 20,
-                plane.getKeyFrames()[0].getRegionHeight());
-        for(Rock r: rocks) {
-            if(camera.position.x - r.position.x > 400 + r.image.getRegionWidth()) {
-                boolean isDown = MathUtils.randomBoolean();
-                r.position.x += 5 * 200;
-                r.position.y = isDown?480-rock.getRegionHeight(): 0;
-                r.image = isDown? rockDown: rock;
-                r.counted = false;
-            }
-            rect2.set(
-                    r.position.x + (r.image.getRegionWidth() - 30) / 2 + 20,
-                    r.position.y,
-                    20,
-                    r.image.getRegionHeight() - 10);
-            if(rect1.overlaps(rect2)) {
-                gameState = GameState.GameOver;
-                planeVelocity.x = 0;                
-            }
-            if(r.position.x < planePosition.x && !r.counted) {
+        
+        plane.setY(plane.getY() + planeSpeed*delta);
+        
+        ground1.moveBy(-scrollSpeed*delta, 0);
+        ground2.moveBy(-scrollSpeed*delta, 0);
+        if (ground1.getRight() < stage.getWidth()) {
+            ground2.setX(ground1.getRight());
+        }
+        if (ground2.getRight() < stage.getWidth()) {
+            ground1.setX(ground2.getRight());
+        }
+
+        for(Coin c: coins) {
+//            if(camera.position.x - r.position.x > 400 + r.image.getRegionWidth()) {
+//                boolean isDown = MathUtils.randomBoolean();
+//                r.position.x -= 5 * 200;
+//                r.position.y = isDown?480-rock.getRegionHeight(): 0;
+//                r.image = isDown? rockDown: rock;
+//                r.counted = false;
+//            }
+            
+            if(Intersector.overlaps(c.getCircle(), plane.getRectangle()) && !c.getCounted()) {
                 score++;
-                r.counted = true;
+                c.setCounted(true);
+            }
+            
+            c.moveBy(-scrollSpeed*delta, c.getCounted() ? 300*delta : 0);
+            
+            if(c.getRight() < 0 || c.getY() > stage.getHeight()) {
+                coins.removeValue(c, true);
+                c.remove();
             }
         }
         
-        if(planePosition.y < ground.getRegionHeight() - 20) {
-            planeVelocity.y = 0;
-            planePosition.y = ground.getRegionHeight() - 20;
+        if(plane.getY() < ground1.getHeight()) {
+            planeSpeed = 0;
+            plane.setY(ground1.getHeight());
         }
         
-        if (planePosition.y > camera.viewportHeight - plane.getKeyFrame(0).getRegionHeight()) {
-            planeVelocity.y = 0;
-            planePosition.y = camera.viewportHeight - plane.getKeyFrame(0).getRegionHeight();
+        if (plane.getY() > stage.getHeight() - plane.getHeight()) {
+            planeSpeed = 0;
+            plane.setY(stage.getHeight() - plane.getHeight());
         }
+        
+        stage.act(delta);
     }
     
     private void drawWorld() {
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-        batch.draw(background, camera.position.x - background.getWidth() / 2, 0);
-        for(Rock rock: rocks) {
-            batch.draw(rock.image, rock.position.x, rock.position.y);
+        scoreText.setText("score: " + score);
+        if (gameState == GameState.Running || gameState == GameState.GameOver) {
+            scoreText.setVisible(true);
         }
-        batch.draw(ground, groundOffsetX, 0);
-        batch.draw(ground, groundOffsetX + ground.getRegionWidth(), 0);
-        batch.draw(plane.getKeyFrame(planeStateTime), planePosition.x, planePosition.y);
-        batch.end();
+        else {
+            scoreText.setVisible(false);
+        }
         
-        batch.setProjectionMatrix(uiCamera.combined);
-        batch.begin();      
-        if(gameState == GameState.Start) {
-            batch.draw(
-                    ready,
-                    Gdx.graphics.getWidth() / 2 - ready.getRegionWidth() / 2,
-                    Gdx.graphics.getHeight() / 2 - ready.getRegionHeight() / 2);
-        }
-        if(gameState == GameState.GameOver) {
-            batch.draw(
-                    gameOver,
-                    Gdx.graphics.getWidth() / 2 - gameOver.getRegionWidth() / 2,
-                    Gdx.graphics.getHeight() / 2 - gameOver.getRegionHeight() / 2);
-        }
-        if(gameState == GameState.GameOver || gameState == GameState.Running) {
-            font.draw(
-                    batch,
-                    "" + score,
-                    Gdx.graphics.getWidth() / 2,
-                    Gdx.graphics.getHeight() - 60);
-        }
-        batch.end();
+        game.getSpriteBatch().begin();
+        stage.draw();
+        game.getSpriteBatch().end();
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         
-        stage.act(delta);
-        updateWorld();
+        updateWorld(delta);
         drawWorld();
-        stage.draw();
     }
     
     @Override
@@ -284,22 +306,6 @@ public class GameScreen implements Screen, OnReadListener {
     
     public void setThreshold(float thresh) {
         this.thresh = thresh;
-    }
-    
-    static class Rock {
-        Vector2 position = new Vector2();
-        TextureRegion image;
-        boolean counted;
-        
-        public Rock(float x, float y, TextureRegion image) {
-            this.position.x = x;
-            this.position.y = y;
-            this.image = image;
-        }
-    }
-    
-    static enum GameState {
-        Start, Running, GameOver
     }
 
     @Override
