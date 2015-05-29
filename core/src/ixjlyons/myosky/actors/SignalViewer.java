@@ -9,9 +9,9 @@ public class SignalViewer {
     };
     
     public static final float[] SIGNAL_COLOR = {
-        0x50 / 256f,
-        0xce / 256f,
-        0xa2 / 256f,
+        0x57 / 256f,
+        0x8c / 256f,
+        0xca / 256f,
         1f
     };
     

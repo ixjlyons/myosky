@@ -3,7 +3,7 @@ package ixjlyons.myosky;
 public class Processor {
 
     /** Number of samples to use in moving average filter */
-    public static final int M = 5;
+    public static final int M = 3;
 
     private MovingAverageFilter filter;
     

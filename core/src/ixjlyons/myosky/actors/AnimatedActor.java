@@ -1,40 +1,45 @@
 package ixjlyons.myosky.actors;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
-public class Plane extends Actor {
+public class AnimatedActor extends Actor {
 
     private Animation animation;
     private float stateTime;
     private Rectangle rectangle = new Rectangle();
     
-    public Plane() {
-        Texture frame1 = new Texture("plane1.png");
-        frame1.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-        Texture frame2 = new Texture("plane2.png");
-        Texture frame3 = new Texture("plane3.png");
+    private float leftMargin = 0;
+    private float topMargin = 0;
+    private float rightMargin = 0;
+    private float bottomMargin = 0;
+    
+    public AnimatedActor(Animation animation) {
+        this.animation = animation;
         
-        animation = new Animation(
-                0.05f,
-                new TextureRegion(frame1),
-                new TextureRegion(frame2),
-                new TextureRegion(frame3),
-                new TextureRegion(frame2));
-        animation.setPlayMode(PlayMode.LOOP);
-        
-        setBounds(getX(), getY(), frame1.getWidth(), frame1.getHeight());
+        setBounds(
+                getX(),
+                getY(),
+                animation.getKeyFrame(0).getRegionWidth(),
+                animation.getKeyFrame(0).getRegionHeight());
+    }
+    
+    public void setMargins(float left, float top, float right, float bottom) {
+        leftMargin = left;
+        topMargin = top;
+        rightMargin = right;
+        bottomMargin = bottom;
     }
     
     public Rectangle getRectangle() {
-        return rectangle.set(getX(), getY(), getWidth(), getHeight());
+        return rectangle.set(
+                getX()+leftMargin,
+                getY()+bottomMargin,
+                getWidth()-leftMargin-rightMargin,
+                getHeight()-topMargin-bottomMargin);
     }
     
     @Override
@@ -55,5 +60,4 @@ public class Plane extends Actor {
                 getScaleX(), getScaleY(),
                 getRotation());
     }
-    
 }

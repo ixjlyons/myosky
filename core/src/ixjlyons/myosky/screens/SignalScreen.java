@@ -1,6 +1,6 @@
 package ixjlyons.myosky.screens;
 
-import ixjlyons.myosky.PlaneGame;
+import ixjlyons.myosky.MyoSwim;
 import ixjlyons.myosky.RecordThread.OnReadListener;
 import ixjlyons.myosky.actors.SignalViewer;
 
@@ -27,7 +27,7 @@ public class SignalScreen implements Screen, OnReadListener {
     
     public static final String TEXT = "This is the raw EMG signal";
     
-    final PlaneGame game;
+    final MyoSwim game;
     
     private Skin skin;
     private OrthographicCamera camera;
@@ -40,17 +40,17 @@ public class SignalScreen implements Screen, OnReadListener {
     private Button prevButton;
     private Label text;
     
-    public SignalScreen(final PlaneGame game) {
+    public SignalScreen(final MyoSwim game) {
         this.game = game;
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, PlaneGame.WIDTH, PlaneGame.HEIGHT);
+        camera.setToOrtho(false, MyoSwim.WIDTH, MyoSwim.HEIGHT);
         
         shapeRenderer = new ShapeRenderer();
         
-        stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
+        stage = new Stage(new ExtendViewport(MyoSwim.WIDTH, MyoSwim.HEIGHT));
         initBackground();
         initText();
         initButtons();
@@ -70,11 +70,11 @@ public class SignalScreen implements Screen, OnReadListener {
     
     private void initButtons() {
         prevButton = new TextButton("<", skin, "default");
-        prevButton.setWidth(PlaneGame.NAV_BUTTON_WIDTH);
-        prevButton.setHeight(PlaneGame.NAV_BUTTON_HEIGHT);
+        prevButton.setWidth(MyoSwim.NAV_BUTTON_WIDTH);
+        prevButton.setHeight(MyoSwim.NAV_BUTTON_HEIGHT);
         prevButton.setPosition(
-               stage.getWidth()-2*prevButton.getWidth()-2*PlaneGame.NAV_BUTTON_PADDING,
-               PlaneGame.NAV_BUTTON_PADDING);
+               stage.getWidth()-2*prevButton.getWidth()-2*MyoSwim.NAV_BUTTON_PADDING,
+               MyoSwim.NAV_BUTTON_PADDING);
         prevButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -83,11 +83,11 @@ public class SignalScreen implements Screen, OnReadListener {
         });
         
         nextButton = new TextButton(">", skin, "default");
-        nextButton.setWidth(PlaneGame.NAV_BUTTON_WIDTH);
-        nextButton.setHeight(PlaneGame.NAV_BUTTON_HEIGHT);
+        nextButton.setWidth(MyoSwim.NAV_BUTTON_WIDTH);
+        nextButton.setHeight(MyoSwim.NAV_BUTTON_HEIGHT);
         nextButton.setPosition(
-                stage.getWidth()-nextButton.getWidth()-PlaneGame.NAV_BUTTON_PADDING,
-                PlaneGame.NAV_BUTTON_PADDING);
+                stage.getWidth()-nextButton.getWidth()-MyoSwim.NAV_BUTTON_PADDING,
+                MyoSwim.NAV_BUTTON_PADDING);
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

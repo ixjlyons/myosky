@@ -1,30 +1,25 @@
 package ixjlyons.myosky.actors;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Align;
 
-public class Coin extends Actor {
+public class Bubble extends Actor {
     
     private TextureRegion textureRegion;
     private Circle bound;
     private boolean counted = false;
     
-    public Coin() {
-        this(0, 0);
-    }
-    
-    public Coin(float x, float y) {
-        setPosition(x, y);
+    public Bubble(TextureRegion textureRegion) {
+        this.textureRegion = textureRegion;
         
-        textureRegion = new TextureRegion(new Texture("coin.png"));
         setBounds(
                 getX(), getY(),
                 textureRegion.getRegionWidth(), textureRegion.getRegionHeight());
+        
         bound = new Circle(getX(), getY(), getWidth()/2);
     }
     

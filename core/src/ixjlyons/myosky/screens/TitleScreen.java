@@ -5,8 +5,8 @@ import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveBy;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.repeat;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
-import ixjlyons.myosky.PlaneGame;
-import ixjlyons.myosky.actors.Plane;
+import ixjlyons.myosky.MyoSwim;
+import ixjlyons.myosky.actors.AnimatedActor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -26,28 +26,28 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class TitleScreen implements Screen {
 
-    final PlaneGame game;
+    final MyoSwim game;
     
     private Stage stage;
-    private Plane plane;
+    private AnimatedActor player;
     private Skin skin;
     private Image background;
     private Button nextButton;
     private Image title;
 
-    public TitleScreen(final PlaneGame game) {
+    public TitleScreen(final MyoSwim game) {
         this.game = game;
         
         skin = new Skin(Gdx.files.internal("uiskin.json"));
         
-        stage = new Stage(new ExtendViewport(PlaneGame.WIDTH, PlaneGame.HEIGHT));
+        stage = new Stage(new ExtendViewport(MyoSwim.WIDTH, MyoSwim.HEIGHT));
         initBackground();
         initButtons();
-        initPlane();
+        initPlayer();
         initTitle();
         stage.addActor(background);
         stage.addActor(nextButton);
-        stage.addActor(plane);
+        stage.addActor(player);
         stage.addActor(title);
     }
     
@@ -63,7 +63,7 @@ public class TitleScreen implements Screen {
         nextButton.setHeight(100);
         nextButton.setPosition(
                 stage.getWidth()/2-nextButton.getWidth()/2,
-                stage.getHeight()/5+nextButton.getHeight()/2);
+                stage.getHeight()/10+nextButton.getHeight()/2);
         nextButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -72,16 +72,16 @@ public class TitleScreen implements Screen {
         });
     }
     
-    private void initPlane() {
-        plane = new Plane();
-        plane.setPosition(-plane.getWidth(), stage.getHeight()/2-plane.getHeight()/2);
-        plane.addAction(
+    private void initPlayer() {
+        player = new AnimatedActor(game.getPlayerAnimation());
+        player.setPosition(-player.getWidth(), stage.getHeight()/2-player.getHeight()/2);
+        player.addAction(
                 delay(1f,
                     sequence(
                         // move to center of the stage
                         moveTo(
-                            stage.getWidth()/2-plane.getWidth()/2,
-                            stage.getHeight()/2-plane.getHeight()/2,
+                            stage.getWidth()/2-player.getWidth()/2,
+                            stage.getHeight()/2-player.getHeight()/2,
                             2f,
                             Interpolation.sineOut),
                         // "bounce" up and down

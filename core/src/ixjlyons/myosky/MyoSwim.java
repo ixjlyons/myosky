@@ -9,9 +9,11 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-public class PlaneGame extends Game {
+public class MyoSwim extends Game {
     
     public static final int WIDTH = 1280;
     public static final int HEIGHT = 800;
@@ -27,12 +29,19 @@ public class PlaneGame extends Game {
     private Screen currentScreen;
     
     private SpriteBatch spriteBatch;
+    private Animation playerAnimation;
+    private Animation enemyAnimation;
+    private TextureRegion bubbleTexture;
     private Music music;
     public RecordThread recordThread;
     
     @Override
     public void create() {
         spriteBatch = new SpriteBatch();
+        
+        playerAnimation = Loader.loadPlayer();
+        enemyAnimation = Loader.loadEnemy();
+        bubbleTexture = Loader.loadBubble();
         
         recordThread = new RecordThread(8000, 600);
         recordThread.start();
@@ -92,5 +101,17 @@ public class PlaneGame extends Game {
     public void dispose() {
         music.dispose();
         recordThread.stopRunning();
+    }
+    
+    public Animation getPlayerAnimation() {
+        return playerAnimation;
+    }
+    
+    public Animation getEnemyAnimation() {
+        return enemyAnimation;
+    }
+    
+    public TextureRegion getBubbleTexture() {
+        return bubbleTexture;
     }
 }

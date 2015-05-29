@@ -1,6 +1,6 @@
 package ixjlyons.myosky.android;
 
-import ixjlyons.myosky.PlaneGame;
+import ixjlyons.myosky.MyoSwim;
 import android.os.Bundle;
 import android.view.WindowManager.LayoutParams;
 
@@ -18,6 +18,6 @@ public class AndroidLauncher extends AndroidApplication {
         config.useAccelerometer = false;
         config.useCompass = false;
         
-        initialize(new PlaneGame(), config);
+        initialize(new MyoSwim(), config);
     }
 }
