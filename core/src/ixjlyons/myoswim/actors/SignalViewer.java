@@ -1,4 +1,4 @@
-package ixjlyons.myosky.actors;
+package ixjlyons.myoswim.actors;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 

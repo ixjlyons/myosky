@@ -1,13 +1,13 @@
-package ixjlyons.myosky.screens;
+package ixjlyons.myoswim.screens;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.rotateTo;
-import ixjlyons.myosky.MyoSwim;
-import ixjlyons.myosky.Processor;
-import ixjlyons.myosky.RecordThread.OnReadListener;
-import ixjlyons.myosky.actors.AnimatedActor;
-import ixjlyons.myosky.actors.Bubble;
+import ixjlyons.myoswim.MyoSwim;
+import ixjlyons.myoswim.Processor;
+import ixjlyons.myoswim.RecordThread.OnReadListener;
+import ixjlyons.myoswim.actors.AnimatedActor;
+import ixjlyons.myoswim.actors.Bubble;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -39,8 +39,8 @@ public class GameScreen implements Screen, OnReadListener {
     private static final boolean DEBUG_MARGINS = false;
     
     private static final float GRAVITY = -10;
-    private static final float PLANE_START_Y = 100;
-    private static final float PLANE_START_X = 50;
+    private static final float PLAYER_START_Y = 100;
+    private static final float PLAYER_START_X = 50;
     private static final float INITIAL_SCROLL_SPEED = 200;
     private static final float SENSITIVITY = 75;
     private static final float SPAWN_DELAY = 5;
@@ -78,7 +78,7 @@ public class GameScreen implements Screen, OnReadListener {
     
     private Processor processor;
     private float scrollSpeed;
-    private float planeSpeed;
+    private float playerSpeed;
     
     private float input = 0.0f;
     private float thresh;
@@ -171,7 +171,7 @@ public class GameScreen implements Screen, OnReadListener {
     private void initPlayer() {
         player = new AnimatedActor(game.getPlayerAnimation());
         player.setMargins(0, 15, 0, 10);
-        player.setPosition(PLANE_START_X, PLANE_START_Y);
+        player.setPosition(PLAYER_START_X, PLAYER_START_Y);
     }
     
     private void initStatusImages() {
@@ -224,9 +224,9 @@ public class GameScreen implements Screen, OnReadListener {
         ground1.setX(0);
         ground2.setX(ground1.getRight());
         player.clearActions();
-        player.setPosition(PLANE_START_X, PLANE_START_Y);
+        player.setPosition(PLAYER_START_X, PLAYER_START_Y);
         player.setRotation(0);
-        planeSpeed = 0;
+        playerSpeed = 0;
         readyImage.setVisible(true);
         gameOverImage.setVisible(false);
         
@@ -247,17 +247,17 @@ public class GameScreen implements Screen, OnReadListener {
             if (Gdx.input.justTouched() || input > thresh) {
                 gameState = GameState.Running;
                 scrollSpeed = INITIAL_SCROLL_SPEED;
-                planeSpeed = 0;
+                playerSpeed = 0;
                 readyImage.setVisible(false);
                 Timer.schedule(spawnTask, SPAWN_DELAY);
             }
         }
         
         else if (gameState == GameState.Running) { 
-            planeSpeed += (input/thresh)*SENSITIVITY;
-            planeSpeed += GRAVITY;
+            playerSpeed += (input/thresh)*SENSITIVITY;
+            playerSpeed += GRAVITY;
             
-            player.setY(player.getY() + planeSpeed*delta);
+            player.setY(player.getY() + playerSpeed*delta);
             
             ground1.moveBy(-scrollSpeed*delta, 0);
             ground2.moveBy(-scrollSpeed*delta, 0);
@@ -315,12 +315,12 @@ public class GameScreen implements Screen, OnReadListener {
             }
             
             if(player.getY() < ground1.getHeight()) {
-                planeSpeed = 0;
+                playerSpeed = 0;
                 player.setY(ground1.getHeight());
             }
             
             if (player.getY() > stage.getHeight() - player.getHeight()) {
-                planeSpeed = 0;
+                playerSpeed = 0;
                 player.setY(stage.getHeight() - player.getHeight());
             }
         }

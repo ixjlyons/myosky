@@ -1,4 +1,4 @@
-package ixjlyons.myosky.actors;
+package ixjlyons.myoswim.actors;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;

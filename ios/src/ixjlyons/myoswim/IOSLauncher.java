@@ -1,11 +1,12 @@
-package ixjlyons.myosky;
+package ixjlyons.myoswim;
 
 import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.uikit.UIApplication;
 
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
-import ixjlyons.myosky.MyoSwim;
+
+import ixjlyons.myoswim.MyoSwim;
 
 public class IOSLauncher extends IOSApplication.Delegate {
     @Override

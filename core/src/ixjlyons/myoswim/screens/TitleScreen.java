@@ -1,12 +1,12 @@
-package ixjlyons.myosky.screens;
+package ixjlyons.myoswim.screens;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.delay;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveBy;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.moveTo;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.repeat;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
-import ixjlyons.myosky.MyoSwim;
-import ixjlyons.myosky.actors.AnimatedActor;
+import ixjlyons.myoswim.MyoSwim;
+import ixjlyons.myoswim.actors.AnimatedActor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;

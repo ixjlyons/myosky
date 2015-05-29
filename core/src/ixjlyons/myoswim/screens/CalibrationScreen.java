@@ -1,9 +1,9 @@
-package ixjlyons.myosky.screens;
+package ixjlyons.myoswim.screens;
 
-import ixjlyons.myosky.MyoSwim;
-import ixjlyons.myosky.Processor;
-import ixjlyons.myosky.RecordThread.OnReadListener;
-import ixjlyons.myosky.actors.SignalViewer;
+import ixjlyons.myoswim.MyoSwim;
+import ixjlyons.myoswim.Processor;
+import ixjlyons.myoswim.RecordThread.OnReadListener;
+import ixjlyons.myoswim.actors.SignalViewer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;

@@ -1,9 +1,9 @@
-package ixjlyons.myosky.client;
+package ixjlyons.myoswim.client;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import ixjlyons.myosky.PlaneGame;
+import ixjlyons.myoswim.PlaneGame;
 
 public class HtmlLauncher extends GwtApplication {
 
@@ -14,6 +14,6 @@ public class HtmlLauncher extends GwtApplication {
 
         @Override
         public ApplicationListener getApplicationListener () {
-                return new PlaneGame();
+                return new MyoSwim();
         }
 }

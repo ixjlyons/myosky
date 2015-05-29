@@ -1,4 +1,4 @@
-package ixjlyons.myosky;
+package ixjlyons.myoswim;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;

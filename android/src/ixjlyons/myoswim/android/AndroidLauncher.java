@@ -1,6 +1,6 @@
-package ixjlyons.myosky.android;
+package ixjlyons.myoswim.android;
 
-import ixjlyons.myosky.MyoSwim;
+import ixjlyons.myoswim.MyoSwim;
 import android.os.Bundle;
 import android.view.WindowManager.LayoutParams;
 

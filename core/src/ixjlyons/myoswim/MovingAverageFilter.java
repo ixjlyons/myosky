@@ -1,4 +1,4 @@
-package ixjlyons.myosky;
+package ixjlyons.myoswim;
 
 public class MovingAverageFilter {
     

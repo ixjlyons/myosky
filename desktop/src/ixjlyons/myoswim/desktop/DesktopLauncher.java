@@ -1,8 +1,9 @@
-package ixjlyons.myosky.desktop;
+package ixjlyons.myoswim.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import ixjlyons.myosky.MyoSwim;
+
+import ixjlyons.myoswim.MyoSwim;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {

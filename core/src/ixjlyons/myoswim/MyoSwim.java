@@ -1,9 +1,9 @@
-package ixjlyons.myosky;
+package ixjlyons.myoswim;
 
-import ixjlyons.myosky.screens.CalibrationScreen;
-import ixjlyons.myosky.screens.GameScreen;
-import ixjlyons.myosky.screens.SignalScreen;
-import ixjlyons.myosky.screens.TitleScreen;
+import ixjlyons.myoswim.screens.CalibrationScreen;
+import ixjlyons.myoswim.screens.GameScreen;
+import ixjlyons.myoswim.screens.SignalScreen;
+import ixjlyons.myoswim.screens.TitleScreen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;

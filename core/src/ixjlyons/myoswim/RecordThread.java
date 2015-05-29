@@ -1,4 +1,4 @@
-package ixjlyons.myosky;
+package ixjlyons.myoswim;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.AudioRecorder;

@@ -3,8 +3,8 @@
 <module rename-to="html">
 	<inherits name='com.badlogic.gdx.backends.gdx_backends_gwt' />
 
-    <inherits name='PlaneGame' />
-	<entry-point class='ixjlyons.myosky.client.HtmlLauncher' />
+    <inherits name='MyoSwim' />
+	<entry-point class='ixjlyons.myoswim.client.HtmlLauncher' />
 	
 	<add-linker name="xsiframe"/>
 	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
