@@ -5,7 +5,7 @@ electromyography at the [World Science Festival][wsf].
 
 It originally started as a fork of [theplanethatcouldntflygood][tptcfg] (which
 is itself a simple Flappy Bird clone written with libgdx, which is itself
-a ripoff of that helicopter Flash game...). I have slowly transitioned to
+a ripoff of that helicopter Flash game...). It has slowly transitioned to
 a pretty different game altogether, where the user controls the vertical
 position of a fish who is trying to hit bubbles and avoid enemy fish. Almost
 none of the "tptcfg" code is still around and all of the original graphics were
