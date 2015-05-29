@@ -37,17 +37,31 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 public class GameScreen implements Screen, OnReadListener {
 
     private static final boolean DEBUG_MARGINS = false;
-    
-    private static final float GRAVITY = -10;
     private static final float PLAYER_START_Y = 100;
     private static final float PLAYER_START_X = 50;
-    private static final float INITIAL_SCROLL_SPEED = 200;
+    
+    // control parameters
     private static final float SENSITIVITY = 75;
+    private static final float GRAVITY = -10;
+    
+    // object spawn parameters
     private static final float SPAWN_DELAY = 5;
-    private static final float[] SPAWN_RANGE = {1, 4};
-    private static final float INITIAL_COIN_PROBABILITY = 1;
-    private static final float MIN_COIN_PROBABILITY = 0.4f;
+    private static final float[] SPAWN_RANGE = {1, 3};
+    
+    // initial conditions
+    private static final float INITIAL_SCROLL_SPEED = 200;
+    private static final float INITIAL_BUBBLE_PROBABILITY = 1;
+    
+    // when to level up
     private static final int LEVEL_UP_SCORE = 5;
+    
+    // what happens when you level up
+    private static final float SCROLL_SPEED_MULT = 1.25f;
+    private static final float BUBBLE_PROBABILITY_MULT = 0.75f;
+    
+    // limits
+    private static final float MAX_SCROLL_SPEED = 800;
+    private static final float MIN_BUBBLE_PROBABILITY = 0.3f;
     
     static enum GameState {
         Start,
@@ -113,7 +127,9 @@ public class GameScreen implements Screen, OnReadListener {
             else {
                 AnimatedActor enemy = new AnimatedActor(game.getEnemyAnimation());
                 enemy.setMargins(0, 50, 120, 40);
-                float y = MathUtils.random(ground1.getHeight(), stage.getHeight()-enemy.getHeight());
+                float y = MathUtils.random(
+                        ground1.getHeight(),
+                        stage.getHeight()-enemy.getHeight());
                 enemy.setPosition(stage.getWidth(), y);
                 stage.addActor(enemy);
                 enemies.add(enemy);
@@ -219,7 +235,7 @@ public class GameScreen implements Screen, OnReadListener {
         spawnTask.cancel();
         score = 0;
         level = 1;
-        coinProbability = INITIAL_COIN_PROBABILITY;
+        coinProbability = INITIAL_BUBBLE_PROBABILITY;
         scrollSpeed = 0;
         ground1.setX(0);
         ground2.setX(ground1.getRight());
@@ -376,12 +392,21 @@ public class GameScreen implements Screen, OnReadListener {
     private void incrementScore(int increment) {
         score += increment;
         if (score % LEVEL_UP_SCORE == 0 || score % LEVEL_UP_SCORE == 1) {
-            level++;
-            coinProbability *= 0.75f;
-            if (coinProbability < MIN_COIN_PROBABILITY) {
-                coinProbability = MIN_COIN_PROBABILITY;
-            }
-            scrollSpeed *= 1.5f;
+            levelUp();
+        }
+    }
+    
+    private void levelUp() {
+        level++;
+        
+        coinProbability *= BUBBLE_PROBABILITY_MULT;
+        if (coinProbability < MIN_BUBBLE_PROBABILITY) {
+            coinProbability = MIN_BUBBLE_PROBABILITY;
+        }
+        
+        scrollSpeed *= SCROLL_SPEED_MULT;
+        if (scrollSpeed > MAX_SCROLL_SPEED) {
+            scrollSpeed = MAX_SCROLL_SPEED;
         }
     }
     
