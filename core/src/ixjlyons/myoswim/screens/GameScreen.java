@@ -46,7 +46,12 @@ public class GameScreen implements Screen, OnReadListener {
     
     // object spawn parameters
     private static final float SPAWN_DELAY = 5;
-    private static final float[] SPAWN_RANGE = {1, 3};
+    private static final float[] SPAWN_TIME_RANGE = {1, 3};
+    private static final boolean SPAWN_ENEMIES = false;
+    private static final boolean SPAWN_DETERMINISTIC = true;
+    private static final float[] SPAWN_HEIGHTS = {
+            0.2f, 0.2f, 0.4f, 0.2f, 0.2f, 0.6f, 0.4f, 0.4f, 0.2f
+    };
     
     // initial conditions
     private static final float INITIAL_SCROLL_SPEED = 200;
@@ -98,26 +103,38 @@ public class GameScreen implements Screen, OnReadListener {
     private float thresh;
     
     private Task spawnTask = new Task() {
+        int spawnIndex = 0;
+        float ynorm = 0;
         @Override
         public void run() {
-            boolean coin = MathUtils.randomBoolean(coinProbability);
+            boolean coin = MathUtils.randomBoolean(coinProbability) || !SPAWN_ENEMIES;
             if (coin) {
                 Bubble c = new Bubble(game.getBubbleTexture());
                 
-                // spawn a coin according to one of two triangular distributions
-                // one centered about the lower half of the stage
-                // one centered about the upper half of the stage
-                boolean low = MathUtils.randomBoolean();
-                float y;
-                if (low) {
-                    y = MathUtils.randomTriangular(
-                            ground1.getHeight(),
-                            stage.getHeight()/2);
+                float y = 0;
+                if (SPAWN_DETERMINISTIC) {
+                    ynorm = SPAWN_HEIGHTS[spawnIndex];
+                    spawnIndex = (spawnIndex < SPAWN_HEIGHTS.length-1) ? spawnIndex+1 : 0;
+                    
+                    y = ground1.getHeight()
+                            + ynorm * (stage.getHeight() - ground1.getHeight())
+                            - c.getHeight()/2;
                 }
                 else {
-                    y = MathUtils.randomTriangular(
-                            stage.getHeight()/2,
-                            stage.getHeight()-c.getHeight());
+                    // spawn a coin according to one of two triangular distributions
+                    // one centered about the lower half of the stage
+                    // one centered about the upper half of the stage
+                    boolean low = MathUtils.randomBoolean();
+                    if (low) {
+                        y = MathUtils.randomTriangular(
+                                ground1.getHeight(),
+                                stage.getHeight()/2);
+                    }
+                    else {
+                        y = MathUtils.randomTriangular(
+                                stage.getHeight()/2,
+                                stage.getHeight()-c.getHeight());
+                    }
                 }
                 
                 c.setPosition(stage.getWidth(), y);
@@ -135,10 +152,16 @@ public class GameScreen implements Screen, OnReadListener {
                 enemies.add(enemy);
             }
             
-            if (gameState == GameState.Running) { 
-                Timer.schedule(
-                        spawnTask,
-                        MathUtils.random(SPAWN_RANGE[0], SPAWN_RANGE[1]));
+            if (gameState == GameState.Running) {
+                float delay;
+                if (SPAWN_DETERMINISTIC) {
+                    delay = (SPAWN_TIME_RANGE[0]+SPAWN_TIME_RANGE[1])/2f;
+                }
+                else {
+                    delay = MathUtils.random(SPAWN_TIME_RANGE[0], SPAWN_TIME_RANGE[1]);
+                }
+                
+                Timer.schedule(spawnTask, delay);
             }
         }
     };
