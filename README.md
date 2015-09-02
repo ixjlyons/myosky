@@ -3,6 +3,8 @@
 This is a game for demonstrating computer interface control through surface
 electromyography at the [World Science Festival][wsf].
 
+![screenshot](/img/screenshot.png?raw=true)
+
 It originally started as a fork of [theplanethatcouldntflygood][tptcfg] (which
 is itself a simple Flappy Bird clone written with libgdx, which is itself
 a ripoff of that helicopter Flash game...). It has slowly transitioned to
