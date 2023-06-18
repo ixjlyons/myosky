@@ -3,6 +3,7 @@ package ixjlyons.myoswim.actors;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
@@ -23,8 +24,8 @@ public class AnimatedActor extends Actor {
         setBounds(
                 getX(),
                 getY(),
-                animation.getKeyFrame(0).getRegionWidth(),
-                animation.getKeyFrame(0).getRegionHeight());
+                ((TextureRegion)animation.getKeyFrame(0)).getRegionWidth(),
+                ((TextureRegion)animation.getKeyFrame(0)).getRegionHeight());
     }
     
     public void setMargins(float left, float top, float right, float bottom) {
@@ -53,7 +54,7 @@ public class AnimatedActor extends Actor {
         Color color = getColor();
         batch.setColor(color.r, color.g, color.b, color.a * parentAlpha);
         batch.draw(
-                animation.getKeyFrame(stateTime),
+                (TextureRegion) animation.getKeyFrame(stateTime),
                 getX(), getY(),
                 getOriginX(), getOriginY(),
                 getWidth(), getHeight(),

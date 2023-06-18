@@ -32,7 +32,7 @@ public class MyoSwim extends Game {
     private Animation playerAnimation;
     private Animation enemyAnimation;
     private TextureRegion bubbleTexture;
-    private Music music;
+    //private Music music;
     public RecordThread recordThread;
     
     @Override
@@ -51,8 +51,8 @@ public class MyoSwim extends Game {
         calibrationScreen = new CalibrationScreen(this);
         gameScreen = new GameScreen(this);
         
-        music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
-        music.setLooping(true);
+        //music = Gdx.audio.newMusic(Gdx.files.internal("music.mp3"));
+        //music.setLooping(true);
         //music.play();
 
         currentScreen = titleScreen;
@@ -99,7 +99,7 @@ public class MyoSwim extends Game {
     
     @Override
     public void dispose() {
-        music.dispose();
+        //music.dispose();
         recordThread.stopRunning();
     }
     

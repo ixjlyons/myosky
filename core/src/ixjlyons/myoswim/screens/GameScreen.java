@@ -41,13 +41,13 @@ public class GameScreen implements Screen, OnReadListener {
     private static final float PLAYER_START_X = 50;
     
     // control parameters
-    private static final float SENSITIVITY = 75;
-    private static final float GRAVITY = -10;
+    private static final float SENSITIVITY = 55;
+    private static final float GRAVITY = -15;
     
     // object spawn parameters
     private static final float SPAWN_DELAY = 5;
     private static final float[] SPAWN_TIME_RANGE = {1, 3};
-    private static final boolean SPAWN_ENEMIES = false;
+    private static final boolean SPAWN_ENEMIES = true;
     private static final boolean SPAWN_DETERMINISTIC = true;
     private static final float[] SPAWN_HEIGHTS = {
             0.2f, 0.2f, 0.4f, 0.2f, 0.2f, 0.6f, 0.4f, 0.4f, 0.2f
@@ -457,7 +457,9 @@ public class GameScreen implements Screen, OnReadListener {
     }
 
     @Override
-    public void resize(int width, int height) {}
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height);
+    }
 
     @Override
     public void show() {
